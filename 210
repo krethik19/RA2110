@@ -1,0 +1,226 @@
+import sqlite3
+db=sqlite3.connect('mydatabase.db')
+curs=db.cursor()
+curs.execute("""CREATE TABLE IF NOT EXISTS
+Movie (Movie_ID VARCHAR(255), 
+Movie_Name VARCHAR(255),
+Genre VARCHAR(255),
+Language VARCHAR(255), 
+Rating FLOAT);""")
+curs.execute("""INSERT INTO Movie VALUES ("101","No time to die","Mystery","English","8");""")
+curs.execute("""INSERT INTO Movie VALUES ("102","POTC","Adventure","English","9");""")
+curs.execute("""INSERT INTO Movie VALUES ("103","Jurassic Park","Thriller","English","9.2");""")
+curs.execute("""INSERT INTO Movie VALUES ("107","Mission Impossible","Thriller","English","7.5");""")
+curs.execute("""INSERT INTO Movie VALUES ("002","The Flopped","drama","English","2.5");""")
+print("Original data")
+curs.execute("SELECT * FROM Movie")
+res=curs.fetchall()
+for i in res:
+    print(i)
+print("")
+curs.execute("""UPDATE Movie SET Rating = ((Rating*110)/100);""")
+print("Printing data after updating rating to 10%")
+curs.execute("SELECT * FROM Movie")
+res=curs.fetchall()
+for i in res:
+    print(i)
+print("")
+curs.execute("""DELETE from Movie where Movie_ID = 102 """)
+print("Displaying data after deleting 102 Movie_ID")
+curs.execute("SELECT * FROM Movie")
+res=curs.fetchall()
+for i in res:
+    print(i)
+print("")
+print("Displaying data having rating value greater than 3")
+curs.execute("SELECT * FROM Movie WHERE Rating>3")
+
+res=curs.fetchall()
+for i in res:
+    print(i)
+print("")
+db.commit()
+db.close()
+
+
+tkinter*****
+from tkinter import *
+root=Tk()
+root.geometry=('500x500')
+root.title('Student Registration')
+label_0=Label(root, text='Regno')
+label_0.grid(row=1,column=1)
+entry_1=Entry(root)
+entry_1.grid(row=1,column=2)
+label_1=Label(root, text='Name:')
+label_1.grid(row=2,column=1)
+entry_2=Entry(root)
+entry_2.grid(row=2,column=2)
+label_2=Label(root, text='Dept')
+label_2.grid(row=3,column=1)
+entry_3=Entry(root)
+entry_3.grid(row=3,column=2)
+var=IntVar()
+label_3=Label(root, text='Gender')
+label_3.grid(row=4,column=1)
+rb1=Radiobutton(root,text='Male',variable=var,value=1)
+rb1.grid(row=4,column=2)
+rb2=Radiobutton(root,text='Female',variable=var,value=2)
+rb2.grid(row=4,column=3)
+label_4=Label(root, text='Age')
+label_4.grid(row=5,column=1)
+entry_5=Spinbox(root, from_=1, to=80)
+entry_5.grid(row=5,column=2)
+b1=Button(root, text='Insert')
+b1.grid(row=6,column=1)
+b1=Button(root, text='Update')
+b1.grid(row=6,column=2)
+b1=Button(root, text='Delete')
+b1.grid(row=7,column=1)
+b1=Button(root, text='Select')
+b1.grid(row=7,column=2)
+root.mainloop()
+
+
+server****
+import socket                                                                                    
+
+
+def server_program():                                    
+    # get the hostname
+    host = socket.gethostname()
+    port = 5000  # initiate port no above 1024
+
+    server_socket = socket.socket()  # get instance
+    # look closely. The bind() function takes tuple as argument
+    server_socket.bind((host, port))  # bind host address and port together
+
+    # configure how many client the server can listen simultaneously
+    server_socket.listen(2)
+    conn, address = server_socket.accept()  # accept new connection
+    print("Connection from: " + str(address))
+    while True:
+        # receive data stream. it won't accept data packet greater than 1024 bytes
+        data = conn.recv(1024).decode()
+        if not data:
+            # if data is not received break
+            break
+        print("from connected user: " + str(data))
+        data = input(' -> ')
+        conn.send(data.encode())  # send data to the client
+
+    conn.close()  # close the connection
+
+clinet****
+import socket
+
+
+def client_program():
+    host = socket.gethostname()  # as both code is running on same pc
+    port = 5000  # socket server port number
+
+    client_socket = socket.socket()  # instantiate
+    client_socket.connect((host, port))  # connect to the server
+
+    message = input(" -> ")  # take input
+
+    while message.lower().strip() != 'bye':
+        client_socket.send(message.encode())  # send message
+        data = client_socket.recv(1024).decode()  # receive response
+
+        print('Received from server: ' + data)  # show in terminal
+
+        message = input(" -> ")  # again take input
+
+    client_socket.close()  # close the connection
+
+
+if __name__ == '__main__':
+    client_program()
+
+consumer****
+import threading
+import time
+
+items = []
+items_cv = threading.Condition()
+
+def prod():
+    print("I'm the producer")
+    for i in range(30):
+        with items_cv:
+            items.append(i)
+            items_cv.notify()
+        time.sleep(1)
+
+def consumer():
+    print("I'm a consumer", threading.current_thread().name)
+    while True:
+        with items_cv:
+            while not items:
+                items_cv.wait()
+            x = items.pop(0)
+            print(threading.current_thread().name, "got", x)
+            time.sleep(5)
+
+con = [threading.Thread(target=consumer) for i in range(10)]
+
+for co in con:
+    co.daemon = True
+    co.start()
+
+prod()
+
+***dining philosopher ****
+import threading
+import random
+import time
+
+class Philosopher(threading.Thread):
+    running = True
+
+    def __init__(self, index, fork_on_left, fork_on_right):
+        threading.Thread.__init__(self)
+        self.index = index
+        self.fork_on_left = fork_on_left
+        self.fork_on_right = fork_on_right
+
+    def run(self):
+        while self.running:
+            time.sleep(30)
+            print(f'Philosopher {self.index} is hungry.')
+            self.dine()
+
+    def dine(self):
+        fork1, fork2 = self.fork_on_left, self.fork_on_right
+        while self.running:
+            fork1.acquire()
+            locked = fork2.acquire(False)
+            if locked:
+                break
+            fork1.release()
+            print(f'Philosopher {self.index} swaps forks.')
+            fork1, fork2 = fork2, fork1
+        else:
+            return
+        self.dining()
+        fork2.release()
+        fork1.release()
+
+    def dining(self):
+        print(f'Philosopher {self.index} starts eating.')
+        time.sleep(30)
+        print(f'Philosopher {self.index} finishes eating and leaves to think.')
+
+def main():
+    forks = [threading.Semaphore() for _ in range(5)]
+    philosophers = [Philosopher(i, forks[i % 5], forks[(i + 1) % 5]) for i in range(5)]
+    Philosopher.running = True
+    for p in philosophers:
+        p.start()
+    time.sleep(100)
+    Philosopher.running = False
+    print("Now we are finishing.")
+
+if __name__ == "__main__":
+    main()
